@@ -1,6 +1,6 @@
 /**
- * @license Angular v5.1.0-beta.0-21bfaf226
- * (c) 2010-2017 Google, Inc. https://angular.io/
+ * @license Angular v7.0.0-beta.4-a2418a9037
+ * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 (function (global, factory) {
@@ -40,7 +40,7 @@ and limitations under the License.
 function __awaiter(thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
@@ -53,8 +53,8 @@ function __generator(thisArg, body) {
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
         while (_) try {
-            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [0, t.value];
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
                 case 0: case 1: t = op; break;
                 case 4: _.label++; return { value: op[1], done: false };
@@ -75,13 +75,13 @@ function __generator(thisArg, body) {
 }
 
 /**
- * @license Angular v5.1.0-beta.0-21bfaf226
- * (c) 2010-2017 Google, Inc. https://angular.io/
+ * @license Angular v7.0.0-beta.4-a2418a9037
+ * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -90,25 +90,31 @@ function __generator(thisArg, body) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/** @type {?} */
 var PARSE_TO_PAIRS = /([0-9]+[^0-9]+)/g;
+/** @type {?} */
 var PAIR_SPLIT = /^([0-9]+)([dhmsu]+)$/;
 /**
  * @param {?} duration
  * @return {?}
  */
 function parseDurationToMs(duration) {
-    var /** @type {?} */ matches = [];
-    var /** @type {?} */ array;
+    /** @type {?} */
+    var matches = [];
+    /** @type {?} */
+    var array;
     while ((array = PARSE_TO_PAIRS.exec(duration)) !== null) {
         matches.push(array[0]);
     }
     return matches
         .map(function (match) {
-        var /** @type {?} */ res = PAIR_SPLIT.exec(match);
+        /** @type {?} */
+        var res = PAIR_SPLIT.exec(match);
         if (res === null) {
             throw new Error("Not a valid duration: " + match);
         }
-        var /** @type {?} */ factor = 0;
+        /** @type {?} */
+        var factor = 0;
         switch (res[2]) {
             case 'd':
                 factor = 86400000;
@@ -135,7 +141,7 @@ function parseDurationToMs(duration) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -144,23 +150,42 @@ function parseDurationToMs(duration) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var WILD_SINGLE = '[^\\/]+';
+/** @type {?} */
+var QUESTION_MARK = '[^/]';
+/** @type {?} */
+var WILD_SINGLE = '[^/]*';
+/** @type {?} */
 var WILD_OPEN = '(?:.+\\/)?';
-var TO_ESCAPE = [
+/** @type {?} */
+var TO_ESCAPE_BASE = [
     { replace: /\./g, with: '\\.' },
-    { replace: /\?/g, with: '\\?' },
     { replace: /\+/g, with: '\\+' },
     { replace: /\*/g, with: WILD_SINGLE },
 ];
+/** @type {?} */
+var TO_ESCAPE_WILDCARD_QM = TO_ESCAPE_BASE.concat([
+    { replace: /\?/g, with: QUESTION_MARK },
+]);
+/** @type {?} */
+var TO_ESCAPE_LITERAL_QM = TO_ESCAPE_BASE.concat([
+    { replace: /\?/g, with: '\\?' },
+]);
 /**
  * @param {?} glob
+ * @param {?=} literalQuestionMark
  * @return {?}
  */
-function globToRegex(glob) {
-    var /** @type {?} */ segments = glob.split('/').reverse();
-    var /** @type {?} */ regex = '';
+function globToRegex(glob, literalQuestionMark) {
+    if (literalQuestionMark === void 0) { literalQuestionMark = false; }
+    /** @type {?} */
+    var toEscape = literalQuestionMark ? TO_ESCAPE_LITERAL_QM : TO_ESCAPE_WILDCARD_QM;
+    /** @type {?} */
+    var segments = glob.split('/').reverse();
+    /** @type {?} */
+    var regex = '';
     while (segments.length > 0) {
-        var /** @type {?} */ segment = /** @type {?} */ ((segments.pop()));
+        /** @type {?} */
+        var segment = /** @type {?} */ ((segments.pop()));
         if (segment === '**') {
             if (segments.length > 0) {
                 regex += WILD_OPEN;
@@ -170,7 +195,8 @@ function globToRegex(glob) {
             }
         }
         else {
-            var /** @type {?} */ processed = TO_ESCAPE.reduce(function (segment, escape) { return segment.replace(escape.replace, escape.with); }, segment);
+            /** @type {?} */
+            var processed = toEscape.reduce(function (segment, escape) { return segment.replace(escape.replace, escape.with); }, segment);
             regex += processed;
             if (segments.length > 0) {
                 regex += '\\/';
@@ -182,7 +208,7 @@ function globToRegex(glob) {
 
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -191,12 +217,19 @@ function globToRegex(glob) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/** @type {?} */
+var DEFAULT_NAVIGATION_URLS = [
+    '/**',
+    '!/**/*.*',
+    '!/**/*__*',
+    '!/**/*__*/**',
+];
 /**
  * Consumes service worker configuration files and processes them into control files.
  *
  * \@experimental
  */
-var Generator = (function () {
+var Generator = /** @class */ (function () {
     function Generator(fs, baseHref) {
         this.fs = fs;
         this.baseHref = baseHref;
@@ -211,21 +244,22 @@ var Generator = (function () {
      */
     function (config) {
         return __awaiter(this, void 0, void 0, function () {
-            var hashTable, _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var unorderedHashTable, assetGroups;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
-                        hashTable = {};
-                        _a = {
-                            configVersion: 1,
-                            index: joinUrls(this.baseHref, config.index),
-                            appData: config.appData
-                        };
-                        return [4 /*yield*/, this.processAssetGroups(config, hashTable)];
-                    case 1: return [2 /*return*/, (_a.assetGroups = _b.sent(),
-                            _a.dataGroups = this.processDataGroups(config),
-                            _a.hashTable = hashTable,
-                            _a)];
+                        unorderedHashTable = {};
+                        return [4 /*yield*/, this.processAssetGroups(config, unorderedHashTable)];
+                    case 1:
+                        assetGroups = _a.sent();
+                        return [2 /*return*/, {
+                                configVersion: 1,
+                                appData: config.appData,
+                                index: joinUrls(this.baseHref, config.index), assetGroups: assetGroups,
+                                dataGroups: this.processDataGroups(config),
+                                hashTable: withOrderedKeys(unorderedHashTable),
+                                navigationUrls: processNavigationUrls(this.baseHref, config.navigationUrls),
+                            }];
                 }
             });
         });
@@ -242,27 +276,32 @@ var Generator = (function () {
      */
     function (config, hashTable) {
         return __awaiter(this, void 0, void 0, function () {
-            var _this = this;
             var seenMap;
+            var _this = this;
             return __generator(this, function (_a) {
                 seenMap = new Set();
                 return [2 /*return*/, Promise.all((config.assetGroups || []).map(function (group) { return __awaiter(_this, void 0, void 0, function () {
+                        var fileMatcher, versionedMatcher, allFiles, plainFiles, versionedFiles, matchedFiles;
                         var _this = this;
-                        var fileMatcher, versionedMatcher, allFiles, versionedFiles, plainFiles, patterns;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
+                                    if (group.resources.versionedFiles) {
+                                        console.warn("Asset-group '" + group.name + "' in 'ngsw-config.json' uses the 'versionedFiles' option.\n" +
+                                            'As of v6 \'versionedFiles\' and \'files\' options have the same behavior. ' +
+                                            'Use \'files\' instead.');
+                                    }
                                     fileMatcher = globListToMatcher(group.resources.files || []);
                                     versionedMatcher = globListToMatcher(group.resources.versionedFiles || []);
                                     return [4 /*yield*/, this.fs.list('/')];
                                 case 1:
-                                    allFiles = (_a.sent());
-                                    versionedFiles = allFiles.filter(versionedMatcher).filter(function (file) { return !seenMap.has(file); });
-                                    versionedFiles.forEach(function (file) { return seenMap.add(file); });
+                                    allFiles = _a.sent();
                                     plainFiles = allFiles.filter(fileMatcher).filter(function (file) { return !seenMap.has(file); });
                                     plainFiles.forEach(function (file) { return seenMap.add(file); });
-                                    // Add the hashes.
-                                    return [4 /*yield*/, versionedFiles.concat(plainFiles).reduce(function (previous, file) { return __awaiter(_this, void 0, void 0, function () {
+                                    versionedFiles = allFiles.filter(versionedMatcher).filter(function (file) { return !seenMap.has(file); });
+                                    versionedFiles.forEach(function (file) { return seenMap.add(file); });
+                                    matchedFiles = plainFiles.concat(versionedFiles).sort();
+                                    return [4 /*yield*/, matchedFiles.reduce(function (previous, file) { return __awaiter(_this, void 0, void 0, function () {
                                             var hash;
                                             return __generator(this, function (_a) {
                                                 switch (_a.label) {
@@ -278,25 +317,13 @@ var Generator = (function () {
                                             });
                                         }); }, Promise.resolve())];
                                 case 2:
-                                    // Add the hashes.
-                                    // Add the hashes.
                                     _a.sent();
-                                    patterns = (group.resources.urls || [])
-                                        .map(function (glob) {
-                                        return glob.startsWith('/') || glob.indexOf('://') !== -1 ?
-                                            glob :
-                                            joinUrls(_this.baseHref, glob);
-                                    })
-                                        .map(function (glob) { return globToRegex(glob); });
                                     return [2 /*return*/, {
                                             name: group.name,
                                             installMode: group.installMode || 'prefetch',
                                             updateMode: group.updateMode || group.installMode || 'prefetch',
-                                            urls: (/** @type {?} */ ([]))
-                                                .concat(plainFiles)
-                                                .concat(versionedFiles)
-                                                .map(function (url) { return joinUrls(_this.baseHref, url); }),
-                                            patterns: patterns,
+                                            urls: matchedFiles.map(function (url) { return joinUrls(_this.baseHref, url); }),
+                                            patterns: (group.resources.urls || []).map(function (url) { return urlToRegex(url, _this.baseHref, true); }),
                                         }];
                             }
                         });
@@ -315,16 +342,9 @@ var Generator = (function () {
     function (config) {
         var _this = this;
         return (config.dataGroups || []).map(function (group) {
-            var /** @type {?} */ patterns = group.urls
-                .map(function (glob) {
-                return glob.startsWith('/') || glob.indexOf('://') !== -1 ?
-                    glob :
-                    joinUrls(_this.baseHref, glob);
-            })
-                .map(function (glob) { return globToRegex(glob); });
             return {
                 name: group.name,
-                patterns: patterns,
+                patterns: group.urls.map(function (url) { return urlToRegex(url, _this.baseHref, true); }),
                 strategy: group.cacheConfig.strategy || 'performance',
                 maxSize: group.cacheConfig.maxSize,
                 maxAge: parseDurationToMs(group.cacheConfig.maxAge),
@@ -336,11 +356,26 @@ var Generator = (function () {
     return Generator;
 }());
 /**
+ * @param {?} baseHref
+ * @param {?=} urls
+ * @return {?}
+ */
+function processNavigationUrls(baseHref, urls) {
+    if (urls === void 0) { urls = DEFAULT_NAVIGATION_URLS; }
+    return urls.map(function (url) {
+        /** @type {?} */
+        var positive = !url.startsWith('!');
+        url = positive ? url : url.substr(1);
+        return { positive: positive, regex: "^" + urlToRegex(url, baseHref) + "$" };
+    });
+}
+/**
  * @param {?} globs
  * @return {?}
  */
 function globListToMatcher(globs) {
-    var /** @type {?} */ patterns = globs.map(function (pattern) {
+    /** @type {?} */
+    var patterns = globs.map(function (pattern) {
         if (pattern.startsWith('!')) {
             return {
                 positive: false,
@@ -362,7 +397,8 @@ function globListToMatcher(globs) {
  * @return {?}
  */
 function matches(file, patterns) {
-    var /** @type {?} */ res = patterns.reduce(function (isMatch, pattern) {
+    /** @type {?} */
+    var res = patterns.reduce(function (isMatch, pattern) {
         if (pattern.positive) {
             return isMatch || pattern.regex.test(file);
         }
@@ -371,6 +407,18 @@ function matches(file, patterns) {
         }
     }, false);
     return res;
+}
+/**
+ * @param {?} url
+ * @param {?} baseHref
+ * @param {?=} literalQuestionMark
+ * @return {?}
+ */
+function urlToRegex(url, baseHref, literalQuestionMark) {
+    if (!url.startsWith('/') && url.indexOf('://') === -1) {
+        url = joinUrls(baseHref, url);
+    }
+    return globToRegex(url, literalQuestionMark);
 }
 /**
  * @param {?} a
@@ -385,6 +433,17 @@ function joinUrls(a, b) {
         return a + '/' + b;
     }
     return a + b;
+}
+/**
+ * @template T
+ * @param {?} unorderedObj
+ * @return {?}
+ */
+function withOrderedKeys(unorderedObj) {
+    /** @type {?} */
+    var orderedObj = /** @type {?} */ ({});
+    Object.keys(unorderedObj).sort().forEach(function (key) { return orderedObj[key] = unorderedObj[key]; });
+    return orderedObj;
 }
 
 exports.Generator = Generator;
