@@ -30,15 +30,15 @@ export class SwPush {
             this.subscription = NEVER;
             return;
         }
-        this.messages = this.sw.eventsOfType('PUSH').pipe(map((message) => message.data));
-        this.pushManager = this.sw.registration.pipe(map((registration) => { return registration.pushManager; }));
+        this.messages = this.sw.eventsOfType('PUSH').pipe(map(message => message.data));
+        this.pushManager = this.sw.registration.pipe(map(registration => registration.pushManager));
         /** @type {?} */
-        const workerDrivenSubscriptions = this.pushManager.pipe(switchMap((pm) => pm.getSubscription().then(sub => { return sub; })));
+        const workerDrivenSubscriptions = this.pushManager.pipe(switchMap(pm => pm.getSubscription()));
         this.subscription = merge(workerDrivenSubscriptions, this.subscriptionChanges);
     }
     /**
-     * Returns true if the Service Worker is enabled (supported by the browser and enabled via
-     * ServiceWorkerModule).
+     * True if the Service Worker is enabled (supported by the browser and enabled via
+     * `ServiceWorkerModule`).
      * @return {?}
      */
     get isEnabled() { return this.sw.isEnabled; }
@@ -60,7 +60,7 @@ export class SwPush {
             applicationServerKey[i] = key.charCodeAt(i);
         }
         pushOptions.applicationServerKey = applicationServerKey;
-        return this.pushManager.pipe(switchMap((pm) => pm.subscribe(pushOptions)), take(1))
+        return this.pushManager.pipe(switchMap(pm => pm.subscribe(pushOptions)), take(1))
             .toPromise()
             .then(sub => {
             this.subscriptionChanges.next(sub);
@@ -102,9 +102,17 @@ SwPush.ctorParameters = () => [
     { type: NgswCommChannel }
 ];
 if (false) {
-    /** @type {?} */
+    /**
+     * Emits the payloads of the received push notification messages.
+     * @type {?}
+     */
     SwPush.prototype.messages;
-    /** @type {?} */
+    /**
+     * Emits the currently active
+     * [PushSubscription](https://developer.mozilla.org/en-US/docs/Web/API/PushSubscription)
+     * associated to the Service Worker registration or `null` if there is no subscription.
+     * @type {?}
+     */
     SwPush.prototype.subscription;
     /** @type {?} */
     SwPush.prototype.pushManager;

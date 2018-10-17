@@ -30,17 +30,17 @@ var SwPush = /** @class */ (function () {
         this.messages = this.sw.eventsOfType('PUSH').pipe(map(function (message) { return message.data; }));
         this.pushManager = this.sw.registration.pipe(map(function (registration) { return registration.pushManager; }));
         /** @type {?} */
-        var workerDrivenSubscriptions = this.pushManager.pipe(switchMap(function (pm) { return pm.getSubscription().then(function (sub) { return sub; }); }));
+        var workerDrivenSubscriptions = this.pushManager.pipe(switchMap(function (pm) { return pm.getSubscription(); }));
         this.subscription = merge(workerDrivenSubscriptions, this.subscriptionChanges);
     }
     Object.defineProperty(SwPush.prototype, "isEnabled", {
         /**
-         * Returns true if the Service Worker is enabled (supported by the browser and enabled via
-         * ServiceWorkerModule).
+         * True if the Service Worker is enabled (supported by the browser and enabled via
+         * `ServiceWorkerModule`).
          */
         get: /**
-         * Returns true if the Service Worker is enabled (supported by the browser and enabled via
-         * ServiceWorkerModule).
+         * True if the Service Worker is enabled (supported by the browser and enabled via
+         * `ServiceWorkerModule`).
          * @return {?}
          */
         function () { return this.sw.isEnabled; },
@@ -122,9 +122,17 @@ var SwPush = /** @class */ (function () {
 }());
 export { SwPush };
 if (false) {
-    /** @type {?} */
+    /**
+     * Emits the payloads of the received push notification messages.
+     * @type {?}
+     */
     SwPush.prototype.messages;
-    /** @type {?} */
+    /**
+     * Emits the currently active
+     * [PushSubscription](https://developer.mozilla.org/en-US/docs/Web/API/PushSubscription)
+     * associated to the Service Worker registration or `null` if there is no subscription.
+     * @type {?}
+     */
     SwPush.prototype.subscription;
     /** @type {?} */
     SwPush.prototype.pushManager;

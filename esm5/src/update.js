@@ -31,12 +31,12 @@ var SwUpdate = /** @class */ (function () {
     }
     Object.defineProperty(SwUpdate.prototype, "isEnabled", {
         /**
-         * Returns true if the Service Worker is enabled (supported by the browser and enabled via
-         * ServiceWorkerModule).
+         * True if the Service Worker is enabled (supported by the browser and enabled via
+         * `ServiceWorkerModule`).
          */
         get: /**
-         * Returns true if the Service Worker is enabled (supported by the browser and enabled via
-         * ServiceWorkerModule).
+         * True if the Service Worker is enabled (supported by the browser and enabled via
+         * `ServiceWorkerModule`).
          * @return {?}
          */
         function () { return this.sw.isEnabled; },
@@ -82,9 +82,15 @@ var SwUpdate = /** @class */ (function () {
 }());
 export { SwUpdate };
 if (false) {
-    /** @type {?} */
+    /**
+     * Emits an `UpdateAvailableEvent` event whenever a new app version is available.
+     * @type {?}
+     */
     SwUpdate.prototype.available;
-    /** @type {?} */
+    /**
+     * Emits an `UpdateActivatedEvent` event whenever the app has been updated to a new version.
+     * @type {?}
+     */
     SwUpdate.prototype.activated;
     /** @type {?} */
     SwUpdate.prototype.sw;

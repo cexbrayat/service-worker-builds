@@ -15,14 +15,8 @@ import { filter, map, publish, switchMap, take, tap } from 'rxjs/operators';
 /** @type {?} */
 export var ERR_SW_NOT_SUPPORTED = 'Service workers are disabled or not supported by this browser';
 /**
- * @record
- */
-export function Version() { }
-/** @type {?} */
-Version.prototype.hash;
-/** @type {?|undefined} */
-Version.prototype.appData;
-/**
+ * An event emitted when a new version of the app is available.
+ *
  * \@experimental
  * @record
  */
@@ -34,6 +28,8 @@ UpdateAvailableEvent.prototype.current;
 /** @type {?} */
 UpdateAvailableEvent.prototype.available;
 /**
+ * An event emitted when a new version of the app has been downloaded and activated.
+ *
  * \@experimental
  * @record
  */
@@ -44,6 +40,15 @@ UpdateActivatedEvent.prototype.type;
 UpdateActivatedEvent.prototype.previous;
 /** @type {?} */
 UpdateActivatedEvent.prototype.current;
+/**
+ * An event emitted when a `PushEvent` is received by the service worker.
+ * @record
+ */
+export function PushEvent() { }
+/** @type {?} */
+PushEvent.prototype.type;
+/** @type {?} */
+PushEvent.prototype.data;
 /** @typedef {?} */
 var IncomingEvent;
 export { IncomingEvent };
@@ -86,38 +91,33 @@ NgswCommChannel = /** @class */ (function () {
         }
         else {
             /** @type {?} */
-            var controllerChangeEvents = /** @type {?} */ ((fromEvent(serviceWorker, 'controllerchange')));
+            var controllerChangeEvents = fromEvent(serviceWorker, 'controllerchange');
             /** @type {?} */
-            var controllerChanges = /** @type {?} */ ((controllerChangeEvents.pipe(map(function () { return serviceWorker.controller; }))));
+            var controllerChanges = controllerChangeEvents.pipe(map(function () { return serviceWorker.controller; }));
             /** @type {?} */
-            var currentController = /** @type {?} */ ((defer(function () { return of(serviceWorker.controller); })));
+            var currentController = defer(function () { return of(serviceWorker.controller); });
             /** @type {?} */
-            var controllerWithChanges = /** @type {?} */ ((concat(currentController, controllerChanges)));
-            this.worker = /** @type {?} */ ((controllerWithChanges.pipe(filter(function (c) { return !!c; }))));
+            var controllerWithChanges = concat(currentController, controllerChanges);
+            this.worker = controllerWithChanges.pipe(filter(function (c) { return !!c; }));
             this.registration = /** @type {?} */ ((this.worker.pipe(switchMap(function () { return serviceWorker.getRegistration(); }))));
             /** @type {?} */
             var rawEvents = fromEvent(serviceWorker, 'message');
             /** @type {?} */
             var rawEventPayload = rawEvents.pipe(map(function (event) { return event.data; }));
             /** @type {?} */
-            var eventsUnconnected = (rawEventPayload.pipe(filter(function (event) { return !!event && !!(/** @type {?} */ (event))['type']; })));
+            var eventsUnconnected = rawEventPayload.pipe(filter(function (event) { return event && event.type; }));
             /** @type {?} */
             var events = /** @type {?} */ (eventsUnconnected.pipe(publish()));
-            this.events = events;
             events.connect();
+            this.events = events;
         }
     }
     /**
-     * @internal
-     */
-    /**
-     * \@internal
      * @param {?} action
      * @param {?} payload
      * @return {?}
      */
     NgswCommChannel.prototype.postMessage = /**
-     * \@internal
      * @param {?} action
      * @param {?} payload
      * @return {?}
@@ -131,17 +131,12 @@ NgswCommChannel = /** @class */ (function () {
             .then(function () { return undefined; });
     };
     /**
-     * @internal
-     */
-    /**
-     * \@internal
      * @param {?} type
      * @param {?} payload
      * @param {?} nonce
      * @return {?}
      */
     NgswCommChannel.prototype.postMessageWithStatus = /**
-     * \@internal
      * @param {?} type
      * @param {?} payload
      * @param {?} nonce
@@ -155,67 +150,45 @@ NgswCommChannel = /** @class */ (function () {
         return Promise.all([waitForStatus, postMessage]).then(function () { return undefined; });
     };
     /**
-     * @internal
-     */
-    /**
-     * \@internal
      * @return {?}
      */
     NgswCommChannel.prototype.generateNonce = /**
-     * \@internal
      * @return {?}
      */
     function () { return Math.round(Math.random() * 10000000); };
     /**
-     * @internal
-     */
-    // TODO(i): the typings and casts in this method are wonky, we should revisit it and make the
-    // types flow correctly
-    /**
-     * \@internal
      * @template T
      * @param {?} type
      * @return {?}
      */
     NgswCommChannel.prototype.eventsOfType = /**
-     * \@internal
      * @template T
      * @param {?} type
      * @return {?}
      */
     function (type) {
-        return /** @type {?} */ (this.events.pipe(filter(function (event) { return event.type === type; })));
+        /** @type {?} */
+        var filterFn = function (event) { return event.type === type; };
+        return this.events.pipe(filter(filterFn));
     };
     /**
-     * @internal
-     */
-    // TODO(i): the typings and casts in this method are wonky, we should revisit it and make the
-    // types flow correctly
-    /**
-     * \@internal
      * @template T
      * @param {?} type
      * @return {?}
      */
     NgswCommChannel.prototype.nextEventOfType = /**
-     * \@internal
      * @template T
      * @param {?} type
      * @return {?}
      */
     function (type) {
-        return /** @type {?} */ ((this.eventsOfType(type).pipe(take(1))));
+        return this.eventsOfType(type).pipe(take(1));
     };
     /**
-     * @internal
-     */
-    /**
-     * \@internal
      * @param {?} nonce
      * @return {?}
      */
     NgswCommChannel.prototype.waitForStatus = /**
-     * \@internal
      * @param {?} nonce
      * @return {?}
      */
@@ -244,20 +217,11 @@ NgswCommChannel = /** @class */ (function () {
  */
 export { NgswCommChannel };
 if (false) {
-    /**
-     * \@internal
-     * @type {?}
-     */
+    /** @type {?} */
     NgswCommChannel.prototype.worker;
-    /**
-     * \@internal
-     * @type {?}
-     */
+    /** @type {?} */
     NgswCommChannel.prototype.registration;
-    /**
-     * \@internal
-     * @type {?}
-     */
+    /** @type {?} */
     NgswCommChannel.prototype.events;
     /** @type {?} */
     NgswCommChannel.prototype.serviceWorker;

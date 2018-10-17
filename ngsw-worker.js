@@ -158,6 +158,14 @@ class SwCriticalError extends Error {
         this.isCritical = true;
     }
 }
+function errorToString(error) {
+    if (error instanceof Error) {
+        return `${error.message}\n${error.stack}`;
+    }
+    else {
+        return `${error}`;
+    }
+}
 
 /**
  * @license
@@ -586,23 +594,32 @@ class AssetGroup {
             if (!res.ok) {
                 throw new Error(`Response not Ok (fetchAndCacheOnce): request for ${req.url} returned response ${res.status} ${res.statusText}`);
             }
-            // This response is safe to cache (as long as it's cloned). Wait until the cache operation
-            // is complete.
-            const cache = await this.scope.caches.open(`${this.prefix}:${this.config.name}:cache`);
-            await cache.put(req, res.clone());
-            // If the request is not hashed, update its metadata, especially the timestamp. This is needed
-            // for future determination of whether this cached response is stale or not.
-            if (!this.hashes.has(req.url)) {
-                // Metadata is tracked for requests that are unhashed.
-                const meta = { ts: this.adapter.time, used };
-                const metaTable = await this.metadata;
-                await metaTable.write(req.url, meta);
+            try {
+                // This response is safe to cache (as long as it's cloned). Wait until the cache operation
+                // is complete.
+                const cache = await this.scope.caches.open(`${this.prefix}:${this.config.name}:cache`);
+                await cache.put(req, res.clone());
+                // If the request is not hashed, update its metadata, especially the timestamp. This is
+                // needed for future determination of whether this cached response is stale or not.
+                if (!this.hashes.has(req.url)) {
+                    // Metadata is tracked for requests that are unhashed.
+                    const meta = { ts: this.adapter.time, used };
+                    const metaTable = await this.metadata;
+                    await metaTable.write(req.url, meta);
+                }
+                return res;
             }
-            return res;
+            catch (err) {
+                // Among other cases, this can happen when the user clears all data through the DevTools,
+                // but the SW is still running and serving another tab. In that case, trying to write to the
+                // caches throws an `Entry was not found` error.
+                // If this happens the SW can no longer work correctly. This situation is unrecoverable.
+                throw new SwCriticalError(`Failed to update the caches for request to '${req.url}' (fetchAndCacheOnce): ${errorToString(err)}`);
+            }
         }
         finally {
             // Finally, it can be removed from `inFlightRequests`. This might result in a double-remove
-            // if some other  chain was already making this request too, but that won't hurt anything.
+            // if some other chain was already making this request too, but that won't hurt anything.
             this.inFlightRequests.delete(req.url);
         }
     }
@@ -2250,7 +2267,7 @@ class Driver {
             // network, but caches continue to be valid for previous versions. This is
             // unfortunate but unavoidable.
             this.state = DriverReadyState.EXISTING_CLIENTS_ONLY;
-            this.stateMessage = `Degraded due to failed initialization: ${errorToString(err)}`;
+            this.stateMessage = `Degraded due to: ${errorToString(err)}`;
             // Cancel the binding for these clients.
             Array.from(this.clientVersionMap.keys())
                 .forEach(clientId => this.clientVersionMap.delete(clientId));
@@ -2264,7 +2281,14 @@ class Driver {
             // Push the affected clients onto the latest version.
             affectedClients.forEach(clientId => this.clientVersionMap.set(clientId, this.latestHash));
         }
-        await this.sync();
+        try {
+            await this.sync();
+        }
+        catch (err2) {
+            // We are already in a bad state. No need to make things worse.
+            // Just log the error and move on.
+            this.debugger.log(err2, `Driver.versionFailed(${err.message || err})`);
+        }
     }
     async setupUpdate(manifest, hash) {
         const newVersion = new AppVersion(this.scope, this.adapter, this.db, this.idle, manifest, hash);
@@ -2489,14 +2513,6 @@ class Driver {
                 statusText: 'Gateway Timeout',
             });
         }
-    }
-}
-function errorToString(error) {
-    if (error instanceof Error) {
-        return `${error.message}\n${error.stack}`;
-    }
-    else {
-        return `${error}`;
     }
 }
 

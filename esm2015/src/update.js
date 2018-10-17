@@ -33,8 +33,8 @@ export class SwUpdate {
         this.activated = this.sw.eventsOfType('UPDATE_ACTIVATED');
     }
     /**
-     * Returns true if the Service Worker is enabled (supported by the browser and enabled via
-     * ServiceWorkerModule).
+     * True if the Service Worker is enabled (supported by the browser and enabled via
+     * `ServiceWorkerModule`).
      * @return {?}
      */
     get isEnabled() { return this.sw.isEnabled; }
@@ -69,9 +69,15 @@ SwUpdate.ctorParameters = () => [
     { type: NgswCommChannel }
 ];
 if (false) {
-    /** @type {?} */
+    /**
+     * Emits an `UpdateAvailableEvent` event whenever a new app version is available.
+     * @type {?}
+     */
     SwUpdate.prototype.available;
-    /** @type {?} */
+    /**
+     * Emits an `UpdateActivatedEvent` event whenever the app has been updated to a new version.
+     * @type {?}
+     */
     SwUpdate.prototype.activated;
     /** @type {?} */
     SwUpdate.prototype.sw;
